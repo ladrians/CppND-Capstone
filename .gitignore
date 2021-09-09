@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+*.pyc
+*.tmp
+build/
+install/
+log/
