@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<!-- Using information from
+http://gazebosim.org/tutorials?tut=ros_gzplugins#GPULaser
+http://www.iroboapp.org/index.php?title=Adding_Hokuyo_Laser_Range_Finder_to_Turtlebot
+-->
+
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="degrees_180" value="3.1415926535897931" />
+  <!-- Sensors properties -->
+  <xacro:property name="scanner_length"  value="0.07570"/>
+  <xacro:property name="scanner_width"   value="0.07570"/>
+  <xacro:property name="scanner_height"  value="0.04080"/>
+  <xacro:property name="scanner_mass"    value="0.2"/>
+  <xacro:property name="sensor_colour"   value="0.8 0 0 1"/>
+
+  <material name="lidar_mat">
+    <color rgba="${sensor_colour}"/>
+  </material>
+
+  <xacro:macro name="lidar_model" params="name parent *origin">
+    <joint name="hokuyo_joint" type="fixed">
+      <axis xyz="0 1 0" />
+      <xacro:insert_block name="origin" />
+      <parent link="body"/>
+      <child link="scanner"/>
+    </joint>
+
+    <!-- Hokuyo Laser -->
+    <link name="scanner">
+      <xacro:visual_collision rpy="0 0 0" material="lidar_mat">
+        <cylinder radius="${scanner_width/2}" length="${scanner_height}"/>
+      </xacro:visual_collision>
+      <xacro:solid_cuboid_inertial
+          width="${scanner_length}" depth="${scanner_width}"
+          height="${scanner_height}" mass="${scanner_mass}">
+        <origin xyz="0 0 0" rpy="0 0 0" />
+      </xacro:solid_cuboid_inertial>
+    </link>
+
+  </xacro:macro>
+
+  <xacro:macro name="lidar" params="name parent width height position samples angle topic orientation">
+    <link name="${name}">
+      <visual>
+        <geometry>
+          <cylinder radius="${width/2}" length="${height}"/>
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <material name="sensor_mat" />
+      </visual>
+    </link>
+  
+    <joint name="base_to_${name}" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}"/>
+      <origin xyz="${position}" rpy="${orientation}"/>
+    </joint>
+  
+    <gazebo reference="${name}">
+      <material>Gazebo/Red</material>
+      <sensor type="ray" name="${name}_hokuyo_sensor">
+        <pose>${width/2} 0 0 0 0 0</pose>
+        <visualize>false</visualize>
+        <update_rate>10</update_rate>
+        <ray>
+          <scan>
+            <horizontal>
+              <samples>${samples}</samples>
+              <resolution>1</resolution>
+              <min_angle>-${angle}</min_angle>
+              <max_angle>${angle}</max_angle>
+            </horizontal>
+          </scan>
+          <range>
+            <min>0.10</min>
+            <max>10.0</max>
+            <resolution>0.001</resolution>
+          </range>
+        </ray>
+        <plugin name="gazebo_ros_${name}_hokuyo_controller" filename="libgazebo_ros_ray_sensor.so">
+          <ros>
+            <namespace>/</namespace>
+            <frame_name>${name}</frame_name>
+            <remapping>~/out:=${topic}</remapping>
+          </ros>
+          <output_type>sensor_msgs/LaserScan</output_type>
+        </plugin>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
+
