@@ -79,7 +79,7 @@ def generate_launch_description():
     # This is a workaround to make rviz get the urdf.
     urdf_pub_data = urdf_contents.replace('"', '\\"')
     launch_urdf = launch.actions.ExecuteProcess(
-        name='launch_urdf', cmd=['ros2', 'topic', 'pub', '-r', '0.5', '/robot_description', 'std_msgs/String', '\'data: "' + urdf_pub_data + '"\''], env=os.environ.copy(), output=output_mode, shell=True, log_cmd=False)
+        name='launch_urdf', cmd=['ros2', 'topic', 'pub', '-r', '0.1', '/robot_description', 'std_msgs/String', '\'data: "' + urdf_pub_data + '"\''], env=os.environ.copy(), output=output_mode, shell=True, log_cmd=False)
 
     ld = LaunchDescription([
         DeclareLaunchArgument(

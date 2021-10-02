@@ -42,7 +42,7 @@ ament_export_dependencies(urdf)
 ament_package()
 
 install(DIRECTORY meshes urdf rviz
-  DESTINATION share/${PROJECT_NAME}
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 install(TARGETS

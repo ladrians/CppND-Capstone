@@ -26,7 +26,7 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
   <xacro:property name="tower_radius"   value="0.01" />
   <xacro:property name="tower_x"        value="${body_length/2 + 0.05}" />
   <xacro:property name="tower_xyz"      value="${tower_x} 0 ${tower_length/2}" />
-  <xacro:property name="tower_mass"     value="0.3" />
+  <xacro:property name="tower_mass"     value="0.05" />
 
   <!-- Wheel properties
        hub_dia and tire_dia are the diameters of the hub and tire,
@@ -49,7 +49,7 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
 
   <!-- Sensor position properties -->
   <xacro:property name="scanner_length"  value="0.07570"/>
-  <xacro:property name="scanner_mass"    value="0.2"/>
+  <xacro:property name="scanner_mass"    value="0.05"/>
   <xacro:property name="sensor_colour"   value="0.8 0 0 1"/>
 
   <xacro:property name="scanner_width"   value="0.07570"/>
@@ -279,33 +279,27 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
 
     <!-- Differential Drive -->
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <alwaysOn>true</alwaysOn>
-      <updateRate>40</updateRate>
+      <update_rate>10</update_rate>
       <legacyMode>false</legacyMode>
       <left_joint>left_bogie_rear_axle</left_joint>
       <right_joint>right_bogie_rear_axle</right_joint>
       <wheel_separation>0.4</wheel_separation>
       <wheel_diameter>0.2</wheel_diameter>
-      <max_wheel_torque>10</max_wheel_torque>
+      <max_wheel_torque>100</max_wheel_torque>
       <max_wheel_acceleration>1.0</max_wheel_acceleration>
-      <commandTopic>cmd_vel</commandTopic>
-      <odometryTopic>odom</odometryTopic>
-      <odometryFrame>odom</odometryFrame>
-      <robotBaseFrame>robot_footprint</robotBaseFrame>
-      <publishWheelTF>true</publishWheelTF>
-      <publishWheelJointState>false</publishWheelJointState>
-      <rosDebugLevel>na</rosDebugLevel>
-      <wheelAcceleration>0</wheelAcceleration>
-      <wheelTorque>5</wheelTorque>
-      <odometrySource>world</odometrySource>
+      <command_topic>cmd_vel</command_topic>
       <publish_odom>true</publish_odom>
-      <publish_odom_tf>true</publish_odom_tf>
-      <robotNamespace>/</robotNamespace>
-      <broadcastTF>1</broadcastTF>
+      <publish_odom_tf>false</publish_odom_tf>
+      <publish_wheel_tf>true</publish_wheel_tf>
+      <odometry_topic>odom</odometry_topic>
       <odometry_frame>odom</odometry_frame>
       <robot_base_frame>robot_footprint</robot_base_frame>
+      <odometry_source>1</odometry_source>
+      <ros>
+        <namespace>/</namespace>
+        <remapping>odom:=odom_shaft</remapping>
+      </ros>
     </plugin>
-
   </gazebo>
 
   <!-- LIDAR sensor -->
