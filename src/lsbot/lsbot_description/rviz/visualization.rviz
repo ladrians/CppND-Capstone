@@ -6,7 +6,13 @@ Panels:
       Expanded:
         - /Global Options1
         - /Status1
-      Splitter Ratio: 0.5
+        - /TF1/Tree1
+        - /TF1/Tree1/robot_footprint1
+        - /TF1/Tree1/robot_footprint1/base_link1
+        - /TF1/Tree1/robot_footprint1/base_link1/body1
+        - /TF1/Tree1/robot_footprint1/base_link1/body1/tower1
+        - /TF1/Tree1/robot_footprint1/base_link1/body1/tower1/motor1_link1
+      Splitter Ratio: 0.8294117450714111
     Tree Height: 589
   - Class: rviz_common/Selection
     Name: Selection
@@ -40,6 +46,74 @@ Visualization Manager:
       Plane: XY
       Plane Cell Count: 10
       Reference Frame: <Fixed Frame>
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        base_link:
+          Value: false
+        body:
+          Value: true
+        floorscan:
+          Value: false
+        imu_link:
+          Value: false
+        left_bogie_front_wheel:
+          Value: false
+        left_bogie_rear_wheel:
+          Value: false
+        left_rocker_rear_wheel:
+          Value: false
+        motor1_cover:
+          Value: true
+        motor1_link:
+          Value: false
+        right_bogie_front_wheel:
+          Value: false
+        right_bogie_rear_wheel:
+          Value: false
+        right_rocker_rear_wheel:
+          Value: false
+        robot_footprint:
+          Value: false
+        scanner:
+          Value: false
+        tower:
+          Value: true
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        robot_footprint:
+          base_link:
+            body:
+              floorscan:
+                {}
+              left_bogie_front_wheel:
+                {}
+              left_rocker_rear_wheel:
+                {}
+              right_bogie_front_wheel:
+                {}
+              right_rocker_rear_wheel:
+                {}
+              scanner:
+                {}
+              tower:
+                motor1_link:
+                  motor1_cover:
+                    {}
+            imu_link:
+              {}
+          left_bogie_rear_wheel:
+            {}
+          right_bogie_rear_wheel:
+            {}
+      Update Interval: 0
       Value: true
     - Alpha: 1
       Class: rviz_default_plugins/RobotModel
@@ -209,7 +283,7 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 8.164287567138672
+      Distance: 1.5864953994750977
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
@@ -224,10 +298,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.3397971987724304
+      Pitch: 0.41979673504829407
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 1.460396647453308
+      Yaw: 1.6904034614562988
     Saved: ~
 Window Geometry:
   Displays:
