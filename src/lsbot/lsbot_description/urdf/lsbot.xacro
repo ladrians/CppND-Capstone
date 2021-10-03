@@ -5,7 +5,8 @@ Ideas taken from
 http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-with-gazebo-and-ros/
 -->
 
-<robot name="sandbox_bot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="lsbot" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <xacro:property name="prefix" value=""/>
   <!-- Degree-to-radian conversions -->
   <xacro:property name="degrees_45" value="0.785398163"/>
   <xacro:property name="degrees_90" value="1.57079633"/>
@@ -227,6 +228,73 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
     <child  link="body"/>
   </joint>
 
+  <xacro:include filename="$(find lsbot_description)/urdf/lsbot.transmission.xacro" />
+  <link name="${prefix}motor1_link">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="0.5"/>
+      <inertia ixx="0.0200769278" ixy="-7.72273E-006" ixz="-0.0050158708" iyy="0.0257088151" iyz="5.49229E-006" izz="0.0120821377"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="Gazebo/Green">
+        <color rgba="0. 0. 0. 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="${prefix}motor1_link">
+    <material>Gazebo/White</material>
+    <selfCollide>True</selfCollide>
+  </gazebo>
+  <link name="${prefix}motor1_cover">
+    <inertial>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <mass value="0.0"/>
+      <inertia ixx="0.0" ixy="0.0" ixz="0.0" iyy="0.0" iyz="0.0" izz="0.0"/>
+    </inertial>
+    <visual>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+      <material name="Gazebo/Black">
+        <color rgba="0. 0. 0. 1"/>
+      </material>
+    </visual>
+    <collision>
+      <origin rpy="0 0 0" xyz="0 0 0"/>
+      <geometry>
+        <box size="0.01 0.01 0.01"/>
+      </geometry>
+    </collision>
+  </link>
+  <gazebo reference="${prefix}motor1_cover">
+    <material>Gazebo/Orange</material>
+    <selfCollide>True</selfCollide>
+  </gazebo>
+  <joint name="${prefix}motor1" type="revolute">
+    <origin rpy="0 0 0" xyz="0 0 0"/>
+    <parent link="${prefix}${tower_name}"/>
+    <child link="${prefix}motor1_link"/>
+    <axis xyz="0 0 1"/>
+    <limit effort="104.0" lower="-3.1416" upper="3.1416" velocity="1.57"/>
+    <dynamics damping="0" friction="0"/>
+  </joint>
+  <joint name="${prefix}motor1_cover_joint" type="fixed">
+    <origin rpy="0 0 0" xyz="0 0 0.0"/>
+    <parent link="${prefix}motor1_link"/>
+    <child link="${prefix}motor1_cover"/>
+  </joint>  
+
   <!-- Tower -->
   <link name="${tower_name}">
     <xacro:visual_collision rpy="0 0 0" material="body_mat">
@@ -276,6 +344,18 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
     <!--plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
       <robotNamespace>/</robotNamespace>
     </plugin-->
+    <plugin name="${prefix}joint_state" filename="libgazebo_ros_joint_state_publisher.so">
+      <ros>
+        <argument>--ros-args --remap ~/out:=${prefix}joint_states</argument>
+      </ros>
+      <update_rate>10</update_rate>
+      <joint_name>${prefix}motor1</joint_name>
+    </plugin>
+
+    <plugin name="lsbot_actuator_rotaryservo" filename="liblsbot_gazebo_joint_plugin.so">
+      <ros></ros>
+      <axis1>${prefix}motor1</axis1>
+    </plugin>
 
     <!-- Differential Drive -->
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
