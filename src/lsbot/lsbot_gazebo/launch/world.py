@@ -34,8 +34,8 @@ def generate_launch_description():
 
     urdf_dir =  os.path.join(dsc_bot,
         'urdf')
-    xacro_urdf = os.path.join(urdf_dir, 'sandbox_bot.xacro')
-    robot_urdf = os.path.join(urdf_dir, 'sandbox_bot.urdf')
+    xacro_urdf = os.path.join(urdf_dir, 'lsbot.xacro')
+    robot_urdf = os.path.join(urdf_dir, 'lsbot.urdf')
     xacro_proc = subprocess.Popen("xacro --inorder {0} gpu:={1} > {2}".format(xacro_urdf, gpu, robot_urdf),
         stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
     xacro_proc.wait()
