@@ -62,8 +62,10 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
   <xacro:property name="scanner_orientation" value="0 0 0"/>
 
   <xacro:property name="floorscanner_position" value="${tower_x + 0.05} 0 ${tower_length}" />
+  <xacro:property name="floorscanner_position_rotate" value="0 0 0" />
   <xacro:property name="floorscanner_topic"   value="/floorscan"/>
   <xacro:property name="floorscanner_orientation" value="0 0.68 0"/>
+  <xacro:property name="floorscanner_orientation_rotate" value="0 0 0"/>
   <xacro:property name="floorscanner_angle"   value="${degrees_90}"/>
 
   <xacro:property name="axle_eff_limit" value="5.12766"/>
@@ -389,6 +391,6 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
   </xacro:lidar-->
 
   <xacro:lidar name="scanner" parent="body" width="${scanner_width}" height="${scanner_height}" position="${scanner_position}" samples="${scanner_samples}" angle="${scanner_angle}" topic="${scanner_topic}" orientation="${scanner_orientation}" />
-  <xacro:lidar name="floorscan" parent="body" width="${scanner_width}" height="${scanner_height}" position="${floorscanner_position}" samples="${scanner_samples}" angle="${floorscanner_angle}" topic="${floorscanner_topic}" orientation="${floorscanner_orientation}" />
+  <xacro:lidar name="floorscan" parent="motor1_cover" width="${scanner_width}" height="${scanner_height}" position="${floorscanner_position_rotate}" samples="${scanner_samples}" angle="${floorscanner_angle}" topic="${floorscanner_topic}" orientation="${floorscanner_orientation_rotate}" />
 
 </robot>
