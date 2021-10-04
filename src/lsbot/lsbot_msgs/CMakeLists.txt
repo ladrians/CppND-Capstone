@@ -20,10 +20,13 @@ find_package(trajectory_msgs REQUIRED)
 
 set(msg_files
   "msg/Angle.msg"
+  "msg/GoalRotaryServo.msg"
+  "msg/StateRotaryServo.msg"
 )
 
 set(srv_files
   "srv/SetAngle.srv"
+  "srv/SpecsRotaryServo.srv"
 )
 
 rosidl_generate_interfaces(${PROJECT_NAME}

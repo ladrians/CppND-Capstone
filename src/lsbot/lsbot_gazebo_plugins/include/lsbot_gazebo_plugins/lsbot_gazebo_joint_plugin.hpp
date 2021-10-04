@@ -15,6 +15,11 @@
 #include "trajectory_msgs/msg/joint_trajectory.hpp"
 #include "nav_msgs/msg/odometry.hpp"
 #include "lsbot_msgs/msg/angle.hpp"
+#include "lsbot_msgs/msg/goal_rotary_servo.hpp"
+#include "lsbot_msgs/msg/state_rotary_servo.hpp"
+
+#include "lsbot_msgs/srv/specs_rotary_servo.hpp"
+#include "lsbot_msgs/srv/set_angle.hpp"
 
 #include <string>
 #include <vector>
@@ -62,6 +67,7 @@ namespace gazebo_plugins
 
     /// Protect variables accessed on callbacks.
     std::mutex lock_;
+    std::mutex odom_mutex_;
 
     /// Update period in seconds.
     double update_period_;
@@ -74,7 +80,14 @@ namespace gazebo_plugins
 
     /// Robot base frame ID
     std::string robot_base_frame_;
+    std::string floorscan_angle_error_message_ = "";
+    std::string floorscan_angle_service_name_ = "/set_angle";
 
+    float current_velocity = 0;
+    float floorscan1_tilt_angle_ = 0.6435;
+    float floorscan1_head_height_ = 0.07;
+    float floorscan1_height_ = 0.6;
+    float floorscan1_corrected_height_ = floorscan1_height_;
     float floorscan_velocity_low_range_ = 0.4;
     float floorscan_velocity_middle_range_ = 0.7;
     int floorscan_angle_counter_ = 0;
@@ -85,39 +98,18 @@ namespace gazebo_plugins
 
     lsbot_msgs::msg::Angle floorscan_angle_msg;
 
-    /*
-    void SpecsCommunicationService(
-        const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<hrim_generic_srvs::srv::SpecsCommunication::Request> req,
-        std::shared_ptr<hrim_generic_srvs::srv::SpecsCommunication::Response> res);
-
     void SpecsRotaryServoService(
         const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<hrim_actuator_rotaryservo_srvs::srv::SpecsRotaryServo::Request> req,
-        std::shared_ptr<hrim_actuator_rotaryservo_srvs::srv::SpecsRotaryServo::Response> res);
+        const std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Request> req,
+        std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Response> res);
 
-    void IDService(
-        const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<hrim_generic_srvs::srv::ID::Request> req,
-        std::shared_ptr<hrim_generic_srvs::srv::ID::Response> res);
+    std::shared_ptr<rclcpp::Publisher<lsbot_msgs::msg::StateRotaryServo>> motor_state_axis1_pub;
+    std::shared_ptr<rclcpp::Publisher<lsbot_msgs::srv::SpecsRotaryServo>> specs_pub;
 
-    void Sim3DService(
-        const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<hrim_generic_srvs::srv::Simulation3D::Request> req,
-        std::shared_ptr<hrim_generic_srvs::srv::Simulation3D::Response> res);
+    std::shared_ptr<rclcpp::Subscription<lsbot_msgs::msg::GoalRotaryServo>> command_sub_axis1_;
 
-    void URDFService(
-        const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<hrim_generic_srvs::srv::SimulationURDF::Request> req,
-        std::shared_ptr<hrim_generic_srvs::srv::SimulationURDF::Response> res);
+    void commandCallback_axis1(const lsbot_msgs::msg::GoalRotaryServo::SharedPtr msg);
 
-    std::shared_ptr<rclcpp::Publisher<hrim_actuator_rotaryservo_msgs::msg::StateRotaryServo>> motor_state_axis1_pub;
-    std::shared_ptr<rclcpp::Publisher<hrim_actuator_rotaryservo_srvs::srv::SpecsRotaryServo>> specs_pub;
-
-    std::shared_ptr<rclcpp::Subscription<hrim_actuator_rotaryservo_msgs::msg::GoalRotaryServo>> command_sub_axis1_;
-
-    void commandCallback_axis1(const hrim_actuator_rotaryservo_msgs::msg::GoalRotaryServo::SharedPtr msg);
-    */
     std::shared_ptr<rclcpp::Publisher<lsbot_msgs::msg::Angle>> angle_pub;
     void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
 
@@ -126,36 +118,12 @@ namespace gazebo_plugins
     std::shared_ptr<rclcpp::TimerBase> timer_status_;
     std::shared_ptr<rclcpp::TimerBase> timer_comm_;
 
-    /*
-    std::shared_ptr<rclcpp::Publisher<hrim_generic_msgs::msg::Status>> status_pub;
-    std::shared_ptr<rclcpp::Publisher<hrim_generic_msgs::msg::Power>> power_pub;
-    std::shared_ptr<rclcpp::Publisher<hrim_generic_msgs::msg::StateCommunication>> state_comm_pub;
-
-    rclcpp::Service<hrim_generic_srvs::srv::ID>::SharedPtr id_srv_;
-    rclcpp::Service<hrim_generic_srvs::srv::Simulation3D>::SharedPtr sim_3d_srv_;
-    rclcpp::Service<hrim_generic_srvs::srv::SimulationURDF>::SharedPtr sim_urdf_srv_;
-    rclcpp::Service<hrim_generic_srvs::srv::SpecsCommunication>::SharedPtr specs_comm_srv_;
-    rclcpp::Service<hrim_actuator_rotaryservo_srvs::srv::SpecsRotaryServo>::SharedPtr specs_srv_;
-    */
+    rclcpp::Service<lsbot_msgs::srv::SpecsRotaryServo>::SharedPtr specs_srv_;
 
     void timer_status_msgs();
-    void timer_comm_msgs();
 
-    /*
-    rclcpp_action::Server<hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory>::SharedPtr action_server_trajectory_axis1_;
+    void execute_trajectory_axis1(float goal_angle);
 
-    std::shared_ptr<rclcpp_action::ServerGoalHandle<hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory>> goal_handle_axis1_;
-    */
-
-    /*
-    void handle_trajectory_axis1_accepted(const std::shared_ptr<rclcpp_action::ServerGoalHandle<hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory>> goal_handle);
-    void execute_trajectory_axis1(const std::shared_ptr<rclcpp_action::ServerGoalHandle<hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory>> goal_handle);
-    rclcpp_action::GoalResponse handle_trajectory_axis1_goal(
-            const std::array<uint8_t, 16> & uuid,
-            std::shared_ptr<const hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory::Goal> goal);
-    rclcpp_action::CancelResponse handle_trajectory_axis1_cancel(
-            const std::shared_ptr<rclcpp_action::ServerGoalHandle<hrim_actuator_rotaryservo_actions::action::GoalJointTrajectory>> goal_handle);
-    */
     bool setFloorScanAngle(float ang);
     void processFloorScanAngle(const lsbot_msgs::msg::Angle::SharedPtr msg);
     void checkFloorScanWithVelocity(float velocity);
@@ -192,8 +160,6 @@ namespace gazebo_plugins
 
     // Documentation inherited
     void Reset() override;
-
-    std::mutex odom_mutex_;
 
   private:
     /// Private data pointer
