@@ -287,7 +287,7 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
     <origin rpy="0 0 0" xyz="0 0 0"/>
     <parent link="${prefix}${tower_name}"/>
     <child link="${prefix}motor1_link"/>
-    <axis xyz="0 0 1"/>
+    <axis xyz="0 1 0"/>
     <limit effort="104.0" lower="-3.1416" upper="3.1416" velocity="1.57"/>
     <dynamics damping="0" friction="0"/>
   </joint>

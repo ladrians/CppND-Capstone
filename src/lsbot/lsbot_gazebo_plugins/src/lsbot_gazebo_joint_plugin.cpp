@@ -19,7 +19,10 @@ void LsbotGazeboPluginRosPrivate::execute_trajectory_axis1(float goal_angle)
       return;
   }
 
-  printf("Executing trajectory...\n");
+  if (debug)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("server"), "Trajectory for:%.3f", goal_angle);
+  }
 
   struct timespec initial_time;
   clock_gettime(CLOCK_REALTIME, &initial_time);
@@ -42,8 +45,11 @@ void LsbotGazeboPluginRosPrivate::execute_trajectory_axis1(float goal_angle)
 
     usleep(10000);
   }
-
-  RCLCPP_INFO(rclcpp::get_logger("server"), "Angle Goal Suceeded");
+  floorscan_angle_msg.status = floorscan_angle_msg.STABLE;
+  if (debug)
+  {
+    RCLCPP_INFO(rclcpp::get_logger("server"), "Angle Goal Suceeded");
+  }
 }
 
 void LsbotGazeboPluginRosPrivate::timer_motor_state_msgs()
@@ -76,11 +82,9 @@ void LsbotGazeboPluginRos::createGenericTopics(std::string node_name)
                       std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Response>)> cb_SpecsRotaryServo_function = std::bind(
         &LsbotGazeboPluginRosPrivate::SpecsRotaryServoService, impl_.get(), std::placeholders::_1,  std::placeholders::_2,  std::placeholders::_3);
   impl_->specs_srv_ = impl_->ros_node_->create_service<lsbot_msgs::srv::SpecsRotaryServo>(service_name_specs, cb_SpecsRotaryServo_function);
-  RCUTILS_LOG_INFO_NAMED(impl_->ros_node_->get_name(), "creating service called: %s ", service_name_specs.c_str());
 
   impl_->angle_pub = impl_->ros_node_->create_publisher<lsbot_msgs::msg::Angle>(topic_name_state_angle,
                 rmw_qos_profile_default);
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "creating %s publisher topic", topic_name_state_angle.c_str());
 
   impl_->timer_status_ = impl_->ros_node_->create_wall_timer(
       1s, std::bind(&LsbotGazeboPluginRosPrivate::timer_status_msgs, impl_.get()));
@@ -89,44 +93,13 @@ void LsbotGazeboPluginRos::createGenericTopics(std::string node_name)
 void LsbotGazeboPluginRosPrivate::odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg)
 {
   std::lock_guard<std::mutex> lock(odom_mutex_);
-  checkFloorScanWithVelocity(msg->twist.twist.linear.x);
+  current_velocity_ = msg->twist.twist.linear.x;
 }
 
-void LsbotGazeboPluginRosPrivate::commandCallback_axis1(const lsbot_msgs::msg::GoalRotaryServo::SharedPtr msg)
+void LsbotGazeboPluginRosPrivate::cmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg)
 {
-  if (!executing_axis1)
-  {
-    if (msg->velocity!=0.0)
-    {
-      trajectories_position_axis1.clear();
-      trajectories_velocities_axis1.clear();
-      std::vector<double> X(2), Y_vel(2), Y_pos(2);
-
-      float current_pose_rad = joints_[LsbotGazeboPluginRosPrivate::AXIS1]->Position(0);
-
-      double start_time = 0;
-      double end_time = fabs(current_pose_rad-msg->position)/msg->velocity;
-
-      Y_vel[0] = 0;
-      Y_pos[0] = current_pose_rad;
-      X[0] = start_time;
-
-      Y_vel[1] = 0;
-      Y_pos[1] = msg->position;
-      X[1] = end_time;
-      /*tk::spline interpolation_vel, interpolation_pos;
-      if (!interpolation_vel.set_points(X, Y_vel))
-        return;
-      if (!interpolation_pos.set_points(X, Y_pos))
-        return;
-
-      for (double t = start_time; t < end_time; t+= 0.001 )
-      {
-        trajectories_position_axis1.push_back(interpolation_pos(t));
-        trajectories_velocities_axis1.push_back(interpolation_vel(t));
-      }*/
-    }
-  }
+  std::lock_guard<std::mutex> lock(vel_mutex_);
+  desired_velocity_ = msg->linear.x;
 }
 
 void LsbotGazeboPluginRos::Load(gazebo::physics::ModelPtr _model, sdf::ElementPtr _sdf)
@@ -169,21 +142,19 @@ void LsbotGazeboPluginRos::Load(gazebo::physics::ModelPtr _model, sdf::ElementPt
   std::string topic_name_motor_state = std::string(node_name) + "/state_axis1";
   impl_->motor_state_axis1_pub = impl_->ros_node_->create_publisher<lsbot_msgs::msg::StateRotaryServo>(topic_name_motor_state,
                         rmw_qos_profile_sensor_data);
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Creating topic %s", topic_name_motor_state.c_str() );
 
-  // Creating command topic name
+  // Creating subscriptions
   std::string topic_odom = "/odom_shaft";
   impl_->odom_sub_ = impl_->ros_node_->create_subscription<nav_msgs::msg::Odometry>(topic_odom,
                                 rmw_qos_profile_sensor_data,
                                 std::bind(&LsbotGazeboPluginRosPrivate::odomCallback, impl_.get(), std::placeholders::_1)
                                 );
-  std::string topic_command_state = std::string(node_name) + "/goal_axis1";
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Creating topic %s", topic_odom.c_str() );
-  impl_->command_sub_axis1_ = impl_->ros_node_->create_subscription<lsbot_msgs::msg::GoalRotaryServo>(topic_command_state,
+
+  std::string topic_cmdvel = "/cmd_vel";
+  impl_->cmdvel_sub_ = impl_->ros_node_->create_subscription<geometry_msgs::msg::Twist>(topic_cmdvel,
                                 rmw_qos_profile_sensor_data,
-                                std::bind(&LsbotGazeboPluginRosPrivate::commandCallback_axis1, impl_.get(), std::placeholders::_1)
+                                std::bind(&LsbotGazeboPluginRosPrivate::cmdvelCallback, impl_.get(), std::placeholders::_1)
                                 );
-  RCLCPP_INFO(impl_->ros_node_->get_logger(), "Creating topic %s", topic_command_state.c_str() );
 
   // Update rate
   auto update_rate = _sdf->Get<double>("update_rate", 1000.0).first;
@@ -218,28 +189,50 @@ void LsbotGazeboPluginRos::Reset()
 
 void LsbotGazeboPluginRosPrivate::OnUpdate(const gazebo::common::UpdateInfo & _info)
 {
-
-  if (!executing_axis1 && trajectories_position_axis1.size()>0)
+  auto& clk = *ros_node_->get_clock();
+  if (!executing_axis1 && trajectories_position_axis1.size() > 0)
   {
     index_trajectory_axis1 = 0;
     executing_axis1 = true;
   }
 
+  float rads = 0;
   if (executing_axis1)
   {
     goal_position_axis1_rad = trajectories_position_axis1[index_trajectory_axis1];
+    rads = to_radians(goal_position_axis1_rad);
     index_trajectory_axis1++;
-    if (index_trajectory_axis1==trajectories_position_axis1.size())
+    if (index_trajectory_axis1 == trajectories_position_axis1.size())
     {
+      if (debug)
+      {
+        RCLCPP_INFO_THROTTLE(ros_node_->get_logger(), clk, log_throttle_, "OnUpdate Initial: %.0f (%.4f)\n", goal_position_axis1_rad, rads);
+      }
       executing_axis1 = false;
       trajectories_position_axis1.clear();
       index_trajectory_axis1 = 0;
     }
   }
 
-  joints_[LsbotGazeboPluginRosPrivate::AXIS1]->SetPosition(0, goal_position_axis1_rad, false);
+  rads = to_radians(goal_position_axis1_rad);
+  bool ret = joints_[LsbotGazeboPluginRosPrivate::AXIS1]->SetPosition(0, rads, false);
+  if (debug)
+  {
+    RCLCPP_INFO_THROTTLE(ros_node_->get_logger(), clk, log_throttle_, "OnUpdate Final: %.0f (%.4f) Ret:%f\n", goal_position_axis1_rad, rads, static_cast<float>(ret));
+  }
 
+  checkFloorScanWithVelocity(desired_velocity_);
   last_update_time_ = _info.simTime;
+  if (ret)
+  {
+    floorscan_angle_msg.status = floorscan_angle_msg.STABLE;
+    floorscan_angle_msg.angle = rads;
+  }
+}
+
+float LsbotGazeboPluginRosPrivate::to_radians(float deg)
+{
+  return deg * M_PI / 180;
 }
 
 void LsbotGazeboPluginRosPrivate::timer_status_msgs()
@@ -248,7 +241,7 @@ void LsbotGazeboPluginRosPrivate::timer_status_msgs()
   gazebo::common::Time cur_time = model_->GetWorld()->SimTime();
   angle_msg.header.stamp.sec = cur_time.sec;
   angle_msg.header.stamp.nanosec = cur_time.nsec;
-  angle_msg.status = angle_msg.STABLE;
+  angle_msg.status = floorscan_angle_msg.status;
   angle_msg.angle = floorscan_angle_msg.angle;
   angle_pub->publish(angle_msg);
 }
@@ -258,6 +251,7 @@ void LsbotGazeboPluginRosPrivate::SpecsRotaryServoService(
     const std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Request>,
     std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Response> res)
 {
+  // This configuration should match the real servo internals configuration
   res->control_type = (uint8_t)lsbot_msgs::srv::SpecsRotaryServo::Response::CONTROL_TYPE_POSITION_VELOCITY;
   res->range_min = joints_[LsbotGazeboPluginRosPrivate::AXIS1]->LowerLimit();
   res->range_max = joints_[LsbotGazeboPluginRosPrivate::AXIS1]->UpperLimit();
@@ -270,35 +264,6 @@ void LsbotGazeboPluginRosPrivate::SpecsRotaryServoService(
 
   res->temperature_range_min  = -10.0; // -10º
   res->temperature_range_max  = +50.0; // 50º
-}
-
-bool LsbotGazeboPluginRosPrivate::setFloorScanAngle(float ang)
-{
-  /*ros::ServiceClient client = n->serviceClient<diffrobot2_msgs::SetAngle>(floorscan_angle_service_name_);
-  diffrobot2_msgs::SetAngle srv;
-  srv.request.angle = ang;
-  bool ret = client.call(srv);
-  floorscan_angle_error_success_ = srv.response.success;
-  floorscan_angle_error_message_ = srv.response.message;
-  */
-  execute_trajectory_axis1(ang);
-  bool ret = true;
-  if (!ret)
-  {
-    RCLCPP_INFO( ros_node_->get_logger(), "Failed to call %s service: %s", floorscan_angle_service_name_.c_str(), floorscan_angle_error_message_.c_str());
-  }
-  return ret;
-}
-
-void LsbotGazeboPluginRosPrivate::processFloorScanAngle(const lsbot_msgs::msg::Angle::SharedPtr msg)
-{
-  floorscan_angle_msg = *msg;
-  if (msg->status != floorscan_angle_msg.STABLE)
-    return;
-
-  floorscan1_tilt_angle_ = floorscan_angle_msg.angle;
-  floorscan1_corrected_height_ = floorscan1_height_ + floorscan1_head_height_ * cos( floorscan1_tilt_angle_ );
-  checkFloorScanWithVelocity(current_velocity);
 }
 
 void LsbotGazeboPluginRosPrivate::checkFloorScanWithVelocity(float velocity)
@@ -318,9 +283,9 @@ void LsbotGazeboPluginRosPrivate::checkFloorScanWithVelocity(float velocity)
   }
   if (desired_angle != floorscan_last_desired_angle)
   {
-    setFloorScanAngle(desired_angle * M_PI / 180);
     floorscan_last_desired_angle = desired_angle;
     floorscan_angle_msg.status = floorscan_angle_msg.UNSTABLE;
+    trajectories_position_axis1.push_back(floorscan_last_desired_angle);
   }
 }
 
