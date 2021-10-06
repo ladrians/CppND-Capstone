@@ -87,12 +87,14 @@ def generate_launch_description():
           default_value=[os.path.join(pkg_bot, 'worlds', 'corridor_with_obstacles.world'), ''],
           description='SDF world file'),
         DeclareLaunchArgument('rviz', default_value='true',
-                              description='Open RViz.'),
+                              description='Open RViz'),
+        DeclareLaunchArgument('rqt', default_value='true',
+                              description='Open RQT plugins'),
         DeclareLaunchArgument('static_tf', default_value='true',
                               description='publish static_tf for wheels'),
         gazebo,
         spawn_entity,
-        launch_urdf,
+        #launch_urdf,
         Node(
             package='robot_state_publisher',
             executable='robot_state_publisher',
@@ -105,6 +107,13 @@ def generate_launch_description():
             executable='rviz2',
             arguments=['-d', rviz_config_dir],
             condition=IfCondition(LaunchConfiguration('rviz')),
+            output=output_mode),
+        Node(
+            name='rqt_gui',
+            package='rqt_gui',
+            executable='rqt_gui',
+            arguments=[],
+            condition=IfCondition(LaunchConfiguration('rqt')),
             output=output_mode),
         Node(
             name='left_bogie_front_wheel',
@@ -151,8 +160,3 @@ def generate_launch_description():
             output=output_mode),
     ])
     return ld
-'''
-  <node name="controller_spawner" pkg="controller_manager" type="spawner"
-        args="rover_joint_publishre rover_velocity_controller --shutdown-timeout 2" />
-  <node pkg="topic_tools" type="relay" name="cmd_vel_relay" args="cmd_vel rover_velocity_controller/cmd_vel" />
-'''
