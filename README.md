@@ -156,13 +156,13 @@ The reasoning behing this decision is that the rover at low speeds will need to 
 
 Parameters can be changed accordingly using:
 
- * Velocity
- ** floorscan_velocity_low_range_
- ** floorscan_velocity_middle_range_
- * Position
- ** floorscan_angle_low_
- ** floorscan_angle_middle_
- ** floorscan_angle_high_
+* Velocity variables
+  * `floorscan_velocity_low_range_`
+  * `floorscan_velocity_middle_range_`
+* Position variables
+  * `floorscan_angle_low_`
+  * `floorscan_angle_middle_`
+  * `floorscan_angle_high_`
 
 The project could be extended to:
 
