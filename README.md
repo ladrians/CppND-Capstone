@@ -28,7 +28,18 @@ The execution results can be checked in [this video](./data/slantedLidar01.mp4).
 
 ##### Requisites
 
-Make sure to install [ROS2 foxy](https://docs.ros.org/en/foxy/Installation.html) or higher, tested used an `Ubuntu 20.04` box.
+Make sure to install [ROS2 foxy](https://docs.ros.org/en/foxy/Installation.html) or higher, it needs a `Ubuntu Linux - Focal Fossa (20.04)` version; tested with a `Ubuntu 20.04` virtual machine.
+
+The default `Udacity workspace` is not valid because it uses a `16.04` version.
+
+```sh
+lsb_release -a
+No LSB modules are available.
+Distributor ID:     Ubuntu
+Description:        Ubuntu 16.04.6 LTS
+Release:  16.04
+Codename: xenial
+```
 
 ##### Repository Setup
 
