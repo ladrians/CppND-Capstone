@@ -3,7 +3,7 @@
 <package format="3">
   <name>lsbot_gazebo</name>
   <version>0.2.1</version>
-  <description>Sandbox Rover description package</description>
+  <description>Sandbox Worls for Gazebo description package</description>
   <author>Luciano Silveira</author>
   <maintainer email="ladrians@gmail.com">Luciano Silveira</maintainer>
   <license>BSD, Apache 2.0</license>
