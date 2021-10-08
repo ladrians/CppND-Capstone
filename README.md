@@ -97,6 +97,92 @@ verbose:=true|false
 ros2 launch lsbot_gazebo world.py rviz:=true gui:=false verbose:=true
 ```
 
+Once running the expected nodes are detailed here:
+
+```sh
+ros2 node list
+# Result
+/differential_drive_controller
+/gazebo
+/gazebo_ros_floorscan_hokuyo_controller
+/gazebo_ros_scanner_hokuyo_controller
+/joint_state
+/left_bogie_front_wheel
+/left_bogie_rear_wheel
+/left_rocker_rear_wheel
+/lsbot_actuator_rotaryservo
+/right_bogie_front_wheel
+/right_bogie_rear_wheel
+/right_rocker_rear_wheel
+/robot_state_publisher
+/rqt_gui
+/rviz2
+/transform_listener_impl_55a25a164aa0
+```
+
+The `lsbot_actuator_rotaryservo` detail:
+
+```sh
+ros2 node info /lsbot_actuator_rotaryservo 
+# Result
+/lsbot_actuator_rotaryservo
+  Subscribers:
+    /clock: rosgraph_msgs/msg/Clock
+    /cmd_vel: geometry_msgs/msg/Twist
+    /odom_shaft: nav_msgs/msg/Odometry
+    /parameter_events: rcl_interfaces/msg/ParameterEvent
+  Publishers:
+    /floorscan/angle: lsbot_msgs/msg/Angle
+    /lsbot_actuator_rotaryservo/state_axis1: lsbot_msgs/msg/StateRotaryServo
+    /parameter_events: rcl_interfaces/msg/ParameterEvent
+    /rosout: rcl_interfaces/msg/Log
+  Service Servers:
+    /lsbot_actuator_rotaryservo/describe_parameters: rcl_interfaces/srv/DescribeParameters
+    /lsbot_actuator_rotaryservo/get_parameter_types: rcl_interfaces/srv/GetParameterTypes
+    /lsbot_actuator_rotaryservo/get_parameters: rcl_interfaces/srv/GetParameters
+    /lsbot_actuator_rotaryservo/list_parameters: rcl_interfaces/srv/ListParameters
+    /lsbot_actuator_rotaryservo/set_parameters: rcl_interfaces/srv/SetParameters
+    /lsbot_actuator_rotaryservo/set_parameters_atomically: rcl_interfaces/srv/SetParametersAtomically
+    /lsbot_actuator_rotaryservo/specs: lsbot_msgs/srv/SpecsRotaryServo
+```
+
+Subscribes to Odometry via `odom_shaft` and Velocity via `cmd_vel`, the main output is detailed on the `/floorscan/angle` and `lsbot_actuator_rotaryservo/state_axis1 publishers`.
+
+Sample execution for the `/floorscan/angle` topic:
+
+```
+ros2 topic echo /floorscan/angle
+# Result
+header:
+  stamp:
+    sec: 645
+    nanosec: 503000000
+  frame_id: ''
+status: 1
+angle: 0.5235987901687622
+```
+
+Sample execution for the `lsbot_actuator_rotaryservo/state_axis1 publishers` topic:
+
+```
+ros2 topic echo lsbot_actuator_rotaryservo/state_axis1
+# Sample Result
+header:
+  stamp:
+    sec: 688
+    nanosec: 704000000
+  frame_id: ''
+goal: 30.0
+position: 0.5235987901161678
+error: 29.476401209883832
+velocity: 3.116157083742192e-07
+effort: 0.0
+load: 0.0
+moving: false
+fault: 0
+control_type: 0
+```
+
 #### Loops, Functions, I/O
 
 Usage of several C++ functions and control structures can be checked on the [lsbot_gazebo_joint_plugin.cpp](src/lsbot/lsbot_gazebo_plugins/src/lsbot_gazebo_joint_plugin.cpp) source file.
