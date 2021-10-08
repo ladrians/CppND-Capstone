@@ -152,6 +152,8 @@ The heuristics defined are encapsulated on the `checkFloorScanWithVelocity` wher
 |0.4 to 0.7|45|
 |0.7 to +inf|30|
 
+The reasoning behing this decision is that the rover at low speeds will need to check obstacles close to it (higher servo angle position); but when moving at higher speeds it is reasonable to higher its position (lower servo angle position) to check obstacles closer to the horizon.
+
 Parameters can be changed accordingly using:
 
  * Velocity
