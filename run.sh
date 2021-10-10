@@ -1,7 +1,7 @@
 #!/bin/bash
-docker run --rm -p 5900:5900 \
+docker run --name capstone --rm -p 5900:5900 \
     -e HOME=/ \
-    -v "$PWD":/home/ros2_project_directory:rw \
+    -v "$PWD":/cppND/CppND-Capstone:rw \
     gazebo_ros2:0.0 \
     x11vnc -forever -create
 
