@@ -9,8 +9,10 @@ RUN apt-get update && apt-get install -y \
     ros-foxy-tf2-ros \
     ros-foxy-tf2 \
     ros-foxy-rviz2 \
+    ros-foxy-xacro \
     ros-foxy-urdf \
     ros-foxy-urdfdom \
+    ros-foxy-robot-state-publisher \
     ros-foxy-rqt ros-foxy-rqt-robot-steering \
     x11vnc \
     xvfb \
