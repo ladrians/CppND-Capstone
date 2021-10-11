@@ -41,9 +41,22 @@ Release:  16.04
 Codename: xenial
 ```
 
-##### Repository Setup
+Use `docker` if you have another environment set. Follow these sample steps, tested with a `VMware Box` using `Ubuntu 18.04`.
 
-Create a Workspace, clone the repository and compile it.
+```sh
+# Install Docker first from https://docs.docker.com/engine/install/ubuntu/
+# Clone the repository
+git clone https://github.com/ladrians/CppND-Capstone ~/ws
+cd ~/ws
+# Build the Image and compile the project
+sudo ./build.sh
+```
+
+For alternative docker command options check the [build](https://docs.docker.com/engine/reference/commandline/build/) and [run](https://docs.docker.com/engine/reference/commandline/run/) references.
+
+##### Local Repository Setup
+
+Create a Workspace, clone the repository and compile it; skip this section if using `docker`.
 
 ```sh
 # Create the workspace
@@ -59,7 +72,9 @@ colcon build --symlink-install
 
 ##### Execution
 
-Before running the project make sure to source it:
+###### Local
+
+If using a local environment, before running the project make sure to source it:
 
 ```sh
 # Source base installation
@@ -74,6 +89,20 @@ Run the sample with the following command:
 ```sh
 ros2 launch lsbot_gazebo world.py
 ```
+
+###### Docker
+
+If using `docker`:
+
+```sh
+cd ~/ws
+# Run the sample
+sudo ./run.sh
+```
+
+Execute `vncviewer`, `redmina` or any other VNC client pointing to `localhost`. From the `rqt` utility, select the `Robot Steering` option to change the linear velocity.
+
+##### Behavior
 
 The expected behavior is to:
 
@@ -268,6 +297,7 @@ The project could be extended to:
 
 ## Resources
 
- * [Gazebo Plugins](http://gazebosim.org/tutorials?tut=ros_gzplugins)
- * [Robotiq modular gripper](https://github.com/YueErro/robotiq_modular_gripper.git)
- * [MARA cobot](https://github.com/AcutronicRobotics/MARA)
+* [Gazebo Plugins](http://gazebosim.org/tutorials?tut=ros_gzplugins)
+* [Robotiq modular gripper](https://github.com/YueErro/robotiq_modular_gripper.git)
+* [MARA cobot](https://github.com/AcutronicRobotics/MARA)
+* [vscode_ros2_workspace](https://github.com/athackst/vscode_ros2_workspace)
