@@ -250,6 +250,13 @@ std::mutex odom_mutex_;
 
 In order to execute the project will need to install the pre-requisites, dependencies and compile this project.
 
+Tested on two environments, a VMware box using `18.04` plus `docker` and a `20.04` one.
+The case could not be validated on a `16.04` environment, the following error appears related to `docker`:
+
+```
+Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?
+```
+
 ## Discussion
 
 The project implements the following packages
