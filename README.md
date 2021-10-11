@@ -56,6 +56,25 @@ For alternative docker command options check the [build](https://docs.docker.com
 
 ##### Local Repository Setup
 
+After installing the default `ROS2 foxy` version add the following packages:
+
+```sh
+sudo apt-get update && apt-get install -y \
+    ros-foxy-gazebo-ros-pkgs \
+    ros-foxy-gazebo-ros \
+    ros-foxy-gazebo-dev \
+    ros-foxy-gazebo-plugins \
+    ros-foxy-tf2-ros \
+    ros-foxy-tf2 \
+    ros-foxy-rviz2 \
+    ros-foxy-xacro \
+    ros-foxy-urdf \
+    ros-foxy-urdfdom \
+    ros-foxy-robot-state-publisher \
+    ros-foxy-rqt
+    ros-foxy-rqt-robot-steering
+```
+
 Create a Workspace, clone the repository and compile it; skip this section if using `docker`.
 
 ```sh
