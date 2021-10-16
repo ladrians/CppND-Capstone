@@ -1,6 +1,7 @@
 #ifndef GAZEBO_PLUGINS_LSBOT_GAZEBO_PLUGINS_HPP_
 #define GAZEBO_PLUGINS_LSBOT_GAZEBO_PLUGINSE_HPP_
 
+#include <gazebo/gazebo.hh>
 #include <gazebo/common/Plugin.hh>
 #include <gazebo/common/Time.hh>
 #include <gazebo/physics/Joint.hh>
@@ -9,31 +10,30 @@
 #include <gazebo/physics/World.hh>
 
 // #include <gazebo_ros/conversions/builtin_interfaces.hpp>
-#include <gazebo_ros/conversions/geometry_msgs.hpp>
-#include <gazebo_ros/node.hpp>
+//#include <gazebo_ros/conversions/geometry_msgs.hpp>
+#include <ros/ros.h>
+#include <ros/node_handle.h>
 
-#include "trajectory_msgs/msg/joint_trajectory.hpp"
-#include "nav_msgs/msg/odometry.hpp"
-#include "geometry_msgs/msg/twist.hpp"
 
-#include "lsbot_msgs/msg/angle.hpp"
-#include "lsbot_msgs/msg/goal_rotary_servo.hpp"
-#include "lsbot_msgs/msg/state_rotary_servo.hpp"
+// Boost
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
 
-#include "lsbot_msgs/srv/specs_rotary_servo.hpp"
-#include "lsbot_msgs/srv/set_angle.hpp"
+#include "trajectory_msgs/JointTrajectory.h"
+#include "nav_msgs/Odometry.h"
+#include "geometry_msgs/Twist.h"
+
+#include "lsbot_msgs/Angle.h"
+#include "lsbot_msgs/GoalRotaryServo.h"
+#include "lsbot_msgs/StateRotaryServo.h"
+
+#include "lsbot_msgs/SpecsRotaryServo.h"
+#include "lsbot_msgs/SetAngle.h"
 
 #include <string>
 #include <vector>
 #include <memory>
 #include <chrono>
-
-#include "rclcpp_action/rclcpp_action.hpp"
-
-#include <ament_index_cpp/get_package_share_directory.hpp>
-
-
-using namespace std::chrono_literals;
 
 namespace gazebo_plugins
 {
@@ -51,13 +51,10 @@ namespace gazebo_plugins
     /// \param[in] _info Updated simulation info.
     void OnUpdate(const gazebo::common::UpdateInfo & _info);
 
-    void timer_motor_state_msgs();
-    std::shared_ptr<rclcpp::TimerBase> timer_motor_state_;
-
     float to_radians(float deg);
 
     /// A pointer to the GazeboROS node.
-    gazebo_ros::Node::SharedPtr ros_node_;
+    boost::shared_ptr<ros::NodeHandle> ros_node_;
 
     /// Connection to event called at every world iteration.
     gazebo::event::ConnectionPtr update_connection_;
@@ -73,7 +70,7 @@ namespace gazebo_plugins
     std::mutex odom_mutex_;
 
     /// Update period in seconds.
-    double update_period_;
+    double update_period_ = 5;
 
     /// Last update time.
     gazebo::common::Time last_update_time_;
@@ -81,38 +78,33 @@ namespace gazebo_plugins
     /// Last time the encoder was updated
     gazebo::common::Time last_encoder_update_;
 
-    float log_throttle_ = 3000; /* ms */
+    float log_throttle_ = 3; /* secs */
     float current_velocity_ = 0;
     float desired_velocity_ = 0;
     float floorscan_velocity_low_range_ = 0.4;
     float floorscan_velocity_middle_range_ = 0.7;
 
+    int rate_ = 5;
     int floorscan_angle_low_ = 60; // degrees
     int floorscan_angle_middle_ = 45; // degrees
     int floorscan_angle_high_ = 30; // degrees
     int floorscan_last_desired_angle = 0;
 
     /// Current Angle configuration
-    lsbot_msgs::msg::Angle floorscan_angle_msg;
+    lsbot_msgs::Angle floorscan_angle_msg;
 
-    /// Service to rotate Servo
-    void SpecsRotaryServoService(
-        const std::shared_ptr<rmw_request_id_t> request_header,
-        const std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Request> req,
-        std::shared_ptr<lsbot_msgs::srv::SpecsRotaryServo::Response> res);
+    ros::Publisher motor_state_axis1_pub;
+    ros::Publisher angle_pub;
 
-    std::shared_ptr<rclcpp::Publisher<lsbot_msgs::msg::StateRotaryServo>> motor_state_axis1_pub;
-    std::shared_ptr<rclcpp::Publisher<lsbot_msgs::msg::Angle>> angle_pub;
+    void odomCallback(const nav_msgs::Odometry::ConstPtr& message);
+    void cmdvelCallback(const geometry_msgs::Twist::ConstPtr& msg);
 
-    void odomCallback(const nav_msgs::msg::Odometry::SharedPtr msg);
-    void cmdvelCallback(const geometry_msgs::msg::Twist::SharedPtr msg);
+    ros::Subscriber odom_sub_;
+    ros::Subscriber cmdvel_sub_;
 
-    std::shared_ptr<rclcpp::Subscription<nav_msgs::msg::Odometry>> odom_sub_;
-    std::shared_ptr<rclcpp::Subscription<geometry_msgs::msg::Twist>> cmdvel_sub_;
+    ros::Timer timer_status_;
 
-    std::shared_ptr<rclcpp::TimerBase> timer_status_;
-
-    rclcpp::Service<lsbot_msgs::srv::SpecsRotaryServo>::SharedPtr specs_srv_;
+    ros::ServiceServer specs_srv_;
 
     /// Status publishers
     void timer_status_msgs();
@@ -121,15 +113,23 @@ namespace gazebo_plugins
 
     /// Change Angle based on velocity
     void checkFloorScanWithVelocity(float velocity);
+    void publishSlantedLidarFrame(float angle);
 
     std::vector<float> trajectories_position_axis1;
     std::vector<float> trajectories_velocities_axis1;
     bool executing_axis1 = false;
     bool debug = false;
+    bool floorscan1_dynamic_frame_ = true;
     unsigned int index_trajectory_axis1 = 0;
     float goal_position_axis1_rad = 0;
+    float floorscan1_dynamic_default_angle_ = 0.68;
 
     std::string type_motor;
+    std::string floorscan1_frame_base_ = "floorscan";
+    std::string floorscan1_frame_child_ = "floorscan_dynamic";
+    std::string topic_odom_ = "/odom_shaft";
+    std::string topic_cmdvel_ = "/cmd_vel";
+    std::string topic_name_state_angle_ = "/floorscan/angle";
   };
 
   /// A plugin for gazebo.
@@ -158,7 +158,7 @@ namespace gazebo_plugins
 
   private:
     /// Private data pointer
-    std::unique_ptr<LsbotGazeboPluginRosPrivate> impl_;
+    boost::shared_ptr<LsbotGazeboPluginRosPrivate> impl_;
   };
 }  // namespace gazebo_plugins
 

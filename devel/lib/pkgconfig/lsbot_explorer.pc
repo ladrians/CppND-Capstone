@@ -1,0 +1,8 @@
+prefix=/home/ladrians/ros_general/lsbot/devel
+
+Name: lsbot_explorer
+Description: Description of lsbot_explorer
+Version: 0.0.1
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

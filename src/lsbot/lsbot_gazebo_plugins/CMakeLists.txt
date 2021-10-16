@@ -1,22 +1,12 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8.3)
 project(lsbot_gazebo_plugins)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # we dont use add_compile_options with pedantic in message packages
-  # because the Python C extensions dont comply with it
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -fpermissive")
-endif()
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wno-psabi ${CMAKE_CXX_FLAGS} -fpermissive")
 
-find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
+find_package(catkin REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
+find_package(roscpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -39,35 +29,23 @@ include_directories(include
   ${nav_msgs_INCLUDE_DIRS}
   ${lsbot_msgs_INCLUDE_DIRS}
 )
-link_directories(${gazebo_dev_LIBRARY_DIRS})
+
+catkin_package(
+  INCLUDE_DIRS include
+  CATKIN_DEPENDS gazebo_dev gazebo_ros roscpp tf2 tf2_ros tf2_geometry_msgs trajectory_msgs roscpp sensor_msgs nav_msgs lsbot_msgs
+)
+
+include_directories(
+  include
+  ${catkin_INCLUDE_DIRS}
+)
 
 add_library(lsbot_gazebo_joint_plugin SHARED
   src/lsbot_gazebo_joint_plugin.cpp
 )
-ament_target_dependencies(lsbot_gazebo_joint_plugin
-  "gazebo_dev"
-  "gazebo_ros"
-  "rclcpp"
-  "rclcpp_action"
-  "tf2"
-  "tf2_geometry_msgs"
-  "tf2_ros"
-  "trajectory_msgs"
-  "ament_index_cpp"
-  "nav_msgs"
-  "lsbot_msgs"
-)
-ament_export_libraries(lsbot_gazebo_joint_plugin)
-
-ament_export_include_directories(include)
-ament_export_dependencies(rclcpp rclcpp_action)
-ament_export_dependencies(gazebo_dev)
-ament_export_dependencies(gazebo_ros)
-
-ament_package()
 
 install(DIRECTORY include/
-        DESTINATION include)
+        DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION})
 
 install(TARGETS
   lsbot_gazebo_joint_plugin

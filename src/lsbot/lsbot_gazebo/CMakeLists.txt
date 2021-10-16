@@ -1,22 +1,12 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 2.8.3)
 project(lsbot_gazebo)
 
-# Default to C++14
-if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
-endif()
-if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-  # we dont use add_compile_options with pedantic in message packages
-  # because the Python C extensions dont comply with it
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -fpermissive")
-endif()
+set(CMAKE_CXX_FLAGS "-std=c++14 -Wno-psabi ${CMAKE_CXX_FLAGS}")
 
-find_package(ament_cmake REQUIRED)
-find_package(ament_index_cpp REQUIRED)
+find_package(catkin REQUIRED)
 find_package(gazebo_dev REQUIRED)
 find_package(gazebo_ros REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclcpp_action REQUIRED)
+find_package(roscpp REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(tf2 REQUIRED)
@@ -25,7 +15,7 @@ find_package(tf2_ros REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(urdf REQUIRED)
 
-include_directories(include
+include_directories(
   ${gazebo_dev_INCLUDE_DIRS}
   ${gazebo_ros_INCLUDE_DIRS}
   ${sensor_msgs_INCLUDE_DIRS}
@@ -36,25 +26,10 @@ include_directories(include
 )
 link_directories(${gazebo_dev_LIBRARY_DIRS})
 
-ament_export_include_directories(include)
-ament_export_dependencies(rclcpp rclcpp_action)
-ament_export_dependencies(gazebo_dev)
-ament_export_dependencies(gazebo_ros)
-
-ament_package()
-
-install(DIRECTORY worlds launch
-  DESTINATION share/${PROJECT_NAME}
+catkin_package(
+  CATKIN_DEPENDS geometry_msgs roscpp gazebo_dev gazebo_ros
 )
 
-#install(
-#  PROGRAMS
-#  scripts/world.py
-#  scripts/robot_description.py
-#  DESTINATION lib/${PROJECT_NAME}
-#)
-
-install(TARGETS
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin)
+install(DIRECTORY worlds launch
+  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
+)

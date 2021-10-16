@@ -1,0 +1,2 @@
+set(lsbot_msgs_MESSAGE_FILES "/home/ladrians/ros_general/lsbot/src/lsbot/lsbot_msgs/msg/Angle.msg;/home/ladrians/ros_general/lsbot/src/lsbot/lsbot_msgs/msg/GoalRotaryServo.msg;/home/ladrians/ros_general/lsbot/src/lsbot/lsbot_msgs/msg/StateRotaryServo.msg")
+set(lsbot_msgs_SERVICE_FILES "/home/ladrians/ros_general/lsbot/src/lsbot/lsbot_msgs/srv/SetAngle.srv;/home/ladrians/ros_general/lsbot/src/lsbot/lsbot_msgs/srv/SpecsRotaryServo.srv")

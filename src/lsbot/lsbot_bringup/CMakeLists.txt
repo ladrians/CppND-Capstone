@@ -1,10 +1,6 @@
 cmake_minimum_required(VERSION 3.5)
 project(lsbot_bringup)
 
-find_package(ament_cmake REQUIRED)
+find_package(catkin REQUIRED COMPONENTS roslaunch)
 
-install(DIRECTORY src include config
-  DESTINATION share/${PROJECT_NAME}
-)
-
-ament_package()
+catkin_package()

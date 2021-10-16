@@ -1,0 +1,8 @@
+prefix=/home/ladrians/ros_general/lsbot/devel
+
+Name: lsbot_description
+Description: Description of lsbot_description
+Version: 0.0.1
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs xacro urdf tf2_ros tf2_geometry_msgs tf2 std_msgs sensor_msgs

@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
-<package format="3">
+<package format="2">
   <name>lsbot_description</name>
   <version>0.0.1</version>
   <description>LSBot Rover description package</description>
@@ -9,20 +9,24 @@
   <license>BSD, Apache 2.0</license>
   <url type="repository">https://github.com/ladrians/CppND-Capstone</url>
 
-  <buildtool_depend>ament_cmake</buildtool_depend>
+  <buildtool_depend>catkin</buildtool_depend>
 
-  <depend>tf2_geometry_msgs</depend>
-  <depend>tf2_ros</depend>
-  <depend>urdf</depend>
-
-  <build_depend>rclcpp</build_depend>
+  <build_depend>tf2_geometry_msgs</build_depend>
+  <build_depend>tf2_ros</build_depend>
+  <build_depend>urdf</build_depend>
+  <build_depend>roscpp</build_depend>
   <build_depend>gazebo_dev</build_depend>
   <build_depend>gazebo_ros</build_depend>
+  <build_depend>xacro</build_depend>
 
-  <exec_depend>rclcpp</exec_depend>
-
-  <export>
-    <build_type>ament_cmake</build_type>
-  </export>
+  <exec_depend>roscpp</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
+  <exec_depend>tf2_geometry_msgs</exec_depend>
+  <exec_depend>tf2_ros</exec_depend>
+  <exec_depend>tf2</exec_depend>
+  <exec_depend>std_msgs</exec_depend>
+  <exec_depend>sensor_msgs</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>urdf</exec_depend>
 
 </package>

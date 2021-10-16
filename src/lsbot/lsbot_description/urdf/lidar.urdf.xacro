@@ -39,7 +39,7 @@ http://www.iroboapp.org/index.php?title=Adding_Hokuyo_Laser_Range_Finder_to_Turt
 
   </xacro:macro>
 
-  <xacro:macro name="lidar" params="name parent width height position samples angle topic orientation">
+  <xacro:macro name="lidar" params="name parent width height position samples angle topic orientation frame">
     <link name="${name}">
       <visual>
         <geometry>
@@ -77,13 +77,9 @@ http://www.iroboapp.org/index.php?title=Adding_Hokuyo_Laser_Range_Finder_to_Turt
             <resolution>0.001</resolution>
           </range>
         </ray>
-        <plugin name="gazebo_ros_${name}_hokuyo_controller" filename="libgazebo_ros_ray_sensor.so">
-          <ros>
-            <namespace>/</namespace>
-            <remapping>~/out:=${topic}</remapping>
-          </ros>
-          <output_type>sensor_msgs/LaserScan</output_type>
-          <frame_name>${name}</frame_name>
+        <plugin name="gazebo_ros_${name}_hokuyo_controller" filename="libgazebo_ros_laser.so">
+          <topicName>${topic}</topicName>
+          <frameName>${frame}</frameName>
         </plugin>
       </sensor>
     </gazebo>

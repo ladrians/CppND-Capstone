@@ -1,0 +1,8 @@
+prefix=/home/ladrians/ros_general/lsbot/devel
+
+Name: lsbot_gazebo
+Description: Description of lsbot_gazebo
+Version: 0.2.1
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: geometry_msgs roscpp gazebo_dev gazebo_ros

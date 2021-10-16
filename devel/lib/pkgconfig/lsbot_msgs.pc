@@ -1,0 +1,8 @@
+prefix=/home/ladrians/ros_general/lsbot/devel
+
+Name: lsbot_msgs
+Description: Description of lsbot_msgs
+Version: 0.0.1
+Cflags: -I/home/ladrians/ros_general/lsbot/devel/include
+Libs: -L${prefix}/lib 
+Requires: std_msgs message_runtime

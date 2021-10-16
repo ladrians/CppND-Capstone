@@ -350,8 +350,8 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
       <ros>
         <argument>--ros-args --remap ~/out:=${prefix}joint_states</argument>
       </ros>
-      <update_rate>10</update_rate>
-      <joint_name>${prefix}motor1</joint_name>
+      <updateRate>10</updateRate>
+      <jointName>${prefix}motor1</jointName>
     </plugin>
 
     <plugin name="lsbot_actuator_rotaryservo" filename="liblsbot_gazebo_joint_plugin.so">
@@ -361,26 +361,28 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
 
     <!-- Differential Drive -->
     <plugin name="differential_drive_controller" filename="libgazebo_ros_diff_drive.so">
-      <update_rate>10</update_rate>
+      <rosDebugLevel>na</rosDebugLevel>
       <legacyMode>false</legacyMode>
-      <left_joint>left_bogie_rear_axle</left_joint>
-      <right_joint>right_bogie_rear_axle</right_joint>
-      <wheel_separation>0.4</wheel_separation>
-      <wheel_diameter>0.2</wheel_diameter>
-      <max_wheel_torque>100</max_wheel_torque>
-      <max_wheel_acceleration>1.0</max_wheel_acceleration>
-      <command_topic>cmd_vel</command_topic>
-      <publish_odom>true</publish_odom>
-      <publish_odom_tf>false</publish_odom_tf>
-      <publish_wheel_tf>true</publish_wheel_tf>
-      <odometry_topic>odom</odometry_topic>
-      <odometry_frame>odom</odometry_frame>
-      <robot_base_frame>robot_footprint</robot_base_frame>
-      <odometry_source>1</odometry_source>
-      <ros>
-        <namespace>/</namespace>
-        <remapping>odom:=odom_shaft</remapping>
-      </ros>
+      <publishWheelTF>true</publishWheelTF>
+      <robotNamespace>/</robotNamespace>
+      <publishTf>1</publishTf>
+      <publishOdomTF>0</publishOdomTF>
+      <publishWheelJointState>true</publishWheelJointState>
+      <alwaysOn>true</alwaysOn>
+      <updateRate>5</updateRate>
+      <leftJoint>left_bogie_rear_axle</leftJoint>
+      <rightJoint>right_bogie_rear_axle</rightJoint>
+      <wheelSeparation>0.4</wheelSeparation>
+      <wheelDiameter>0.2</wheelDiameter>
+      <broadcastTF>1</broadcastTF>
+      <wheelTorque>2800</wheelTorque>
+      <wheelAcceleration>1.0</wheelAcceleration>
+      <commandTopic>cmd_vel</commandTopic>
+      <odometryFrame>odom</odometryFrame>
+      <odometryTopic>odom_shaft</odometryTopic>
+      <robotBaseFrame>robot_footprint</robotBaseFrame>
+      <odometrySource>world</odometrySource>
+      <!--odometrysource>1</odometry_source-->
     </plugin>
   </gazebo>
 
@@ -390,7 +392,7 @@ http://www.generationrobots.com/blog/en/2015/02/robotic-simulation-scenarios-wit
     <origin xyz="${scanner_position}" rpy="0 0 0"/>
   </xacro:lidar-->
 
-  <xacro:lidar name="scanner" parent="body" width="${scanner_width}" height="${scanner_height}" position="${scanner_position}" samples="${scanner_samples}" angle="${scanner_angle}" topic="${scanner_topic}" orientation="${scanner_orientation}" />
-  <xacro:lidar name="floorscan" parent="motor1_cover" width="${scanner_width}" height="${scanner_height}" position="${floorscanner_position_rotate}" samples="${scanner_samples}" angle="${floorscanner_angle}" topic="${floorscanner_topic}" orientation="${floorscanner_orientation_rotate}" />
+  <xacro:lidar name="scanner" parent="body" width="${scanner_width}" height="${scanner_height}" position="${scanner_position}" samples="${scanner_samples}" angle="${scanner_angle}" topic="${scanner_topic}" orientation="${scanner_orientation}" frame="scanner"/>
+  <xacro:lidar name="floorscan" parent="motor1_cover" width="${scanner_width}" height="${scanner_height}" position="${floorscanner_position_rotate}" samples="${scanner_samples}" angle="${floorscanner_angle}" topic="${floorscanner_topic}" orientation="${floorscanner_orientation_rotate}" frame="floorscan_dynamic"/>
 
 </robot>
